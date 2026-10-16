@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#5C3D2E" />
+  <title>🍬 Trufas — Estoque</title>
+
+  <!-- Google Fonts: Poppins para uma aparência moderna e elegante -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Ícones (Font Awesome via CDN gratuito) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Estilos do sistema -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+  <!-- ─── Cabeçalho ──────────────────────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="header-icon">🍬</span>
+        <div>
+          <h1 class="header-title">Trufas</h1>
+          <p class="header-subtitle">Controle de Estoque</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ─── Conteúdo principal ─────────────────────────────────────────────────── -->
+  <main class="app-main">
+
+    <!-- Mensagens flash (feedback de ações) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-container">
+          {% for category, message in messages %}
+            <div class="flash flash--{{ category }}">
+              <i class="fa-solid {% if category == 'success' %}fa-circle-check{% elif category == 'error' %}fa-circle-xmark{% else %}fa-circle-info{% endif %}"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ─── Barra de ações fixas no rodapé ─────────────────────────────────────── -->
+  <nav class="bottom-bar">
+    <a href="/produto/novo" class="bottom-btn bottom-btn--primary">
+      <i class="fa-solid fa-plus"></i>
+      <span>Novo Sabor</span>
+    </a>
+    <button class="bottom-btn bottom-btn--gold" onclick="abrirRelatorio()">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Vendas</span>
+    </button>
+    <button class="bottom-btn bottom-btn--whatsapp" onclick="compartilharWhatsApp()">
+      <i class="fa-brands fa-whatsapp"></i>
+      <span>WhatsApp</span>
+    </button>
+  </nav>
+
+  <!-- ─── Modal: Relatório de Vendas ─────────────────────────────────────────── -->
+  <div class="modal-overlay" id="modalRelatorio" onclick="fecharModal('modalRelatorio')">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title"><i class="fa-solid fa-chart-line"></i> Relatório de Vendas</h2>
+        <button class="modal-close" onclick="fecharModal('modalRelatorio')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="relatorioConteudo">
+        <div class="loading-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i> Carregando...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Modal: WhatsApp Preview ─────────────────────────────────────────────── -->
+  <div class="modal-overlay" id="modalWhatsApp" onclick="fecharModal('modalWhatsApp')">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title"><i class="fa-brands fa-whatsapp"></i> Compartilhar Cardápio</h2>
+        <button class="modal-close" onclick="fecharModal('modalWhatsApp')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-hint">Prévia da mensagem que será enviada:</p>
+        <div class="whatsapp-preview" id="whatsappTexto">Carregando...</div>
+        <div class="modal-actions">
+          <button class="btn btn--gold btn--full" onclick="copiarTexto()">
+            <i class="fa-solid fa-copy"></i> Copiar Mensagem
+          </button>
+          <a id="btnAbrirWpp" href="#" target="_blank" class="btn btn--whatsapp btn--full">
+            <i class="fa-brands fa-whatsapp"></i> Abrir no WhatsApp
+          </a>
+        </div>
+        <div class="copy-feedback" id="copyFeedback">
+          <i class="fa-solid fa-circle-check"></i> Copiado para a área de transferência!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

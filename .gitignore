@@ -1,0 +1,27 @@
+# Ambiente Virtual Python
+.venv/
+
+# Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Banco de dados local (dados da sua esposa ficam no celular, não vão pro GitHub)
+*.db
+*.sqlite
+*.sqlite3
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# IDEs e editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Variáveis de ambiente (segredos)
+.env
+

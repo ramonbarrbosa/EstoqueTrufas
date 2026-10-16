@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- ─── Resumo do Estoque ──────────────────────────────────────────────────── -->
+<section class="stock-summary">
+  <div class="summary-card">
+    <span class="summary-number">{{ produtos | length }}</span>
+    <span class="summary-label">Sabores</span>
+  </div>
+  <div class="summary-card summary-card--available">
+    <span class="summary-number">{{ produtos | selectattr('status', 'equalto', 'disponivel') | list | length }}</span>
+    <span class="summary-label">Disponíveis</span>
+  </div>
+  <div class="summary-card summary-card--total">
+    <span class="summary-number">{{ produtos | sum(attribute='quantidade') }}</span>
+    <span class="summary-label">Unidades</span>
+  </div>
+</section>
+
+<!-- ─── Lista de Produtos ─────────────────────────────────────────────────── -->
+{% if produtos %}
+  <section class="product-list">
+    {% for p in produtos %}
+      <div class="product-card {% if p.status == 'esgotado' %}product-card--esgotado{% endif %}">
+
+        <!-- Cabeçalho do cartão -->
+        <div class="product-header">
+          <div>
+            <h3 class="product-name">{{ p.nome }}</h3>
+            <span class="price-badge">
+              <i class="fa-solid fa-tag"></i>
+              R$ {{ "%.2f"|format(p.preco) }}
+            </span>
+          </div>
+          <span class="status-badge status-badge--{{ p.status }}">
+            {% if p.status == 'disponivel' %}
+              <i class="fa-solid fa-circle-check"></i> Disponível
+            {% else %}
+              <i class="fa-solid fa-circle-xmark"></i> Esgotado
+            {% endif %}
+          </span>
+        </div>
+
+        <!-- Quantidade e controles rápidos -->
+        <div class="product-body">
+          <div class="qty-control">
+            <form action="/produto/{{ p.id }}/venda" method="POST" onsubmit="return confirmarVenda(event, '{{ p.nome }}')">
+              <button type="submit" class="qty-btn qty-btn--minus" {% if p.quantidade == 0 %}disabled{% endif %}>
+                <i class="fa-solid fa-minus"></i>
+              </button>
+            </form>
+
+            <div class="qty-display">
+              <span class="qty-number {% if p.quantidade == 0 %}qty-number--zero{% elif p.quantidade <= 3 %}qty-number--low{% endif %}">
+                {{ p.quantidade }}
+              </span>
+              <span class="qty-unit">unid.</span>
+            </div>
+
+            <form action="/produto/{{ p.id }}/adicionar" method="POST">
+              <button type="submit" class="qty-btn qty-btn--plus">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </form>
+          </div>
+
+          <!-- Ações de editar / excluir -->
+          <div class="product-actions">
+            <a href="/produto/{{ p.id }}/editar" class="action-btn action-btn--edit" title="Editar sabor">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </a>
+            <form action="/produto/{{ p.id }}/deletar" method="POST"
+                  onsubmit="return confirmarExclusao(event, '{{ p.nome }}')">
+              <button type="submit" class="action-btn action-btn--delete" title="Excluir sabor">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    {% endfor %}
+  </section>
+
+{% else %}
+  <!-- Estado vazio -->
+  <div class="empty-state">
+    <div class="empty-icon">🍬</div>
+    <h2 class="empty-title">Nenhum sabor cadastrado</h2>
+    <p class="empty-text">Toque em <strong>"Novo Sabor"</strong> abaixo para começar a montar o seu cardápio!</p>
+  </div>
+{% endif %}
+
+{% endblock %}

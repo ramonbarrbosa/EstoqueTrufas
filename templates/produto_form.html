@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="form-container">
+
+  <h2 class="form-title">
+    {% if produto %}
+      <i class="fa-solid fa-pen-to-square"></i> Editar Sabor
+    {% else %}
+      <i class="fa-solid fa-plus"></i> Novo Sabor
+    {% endif %}
+  </h2>
+
+  <form method="POST">
+
+    <!-- Nome / Sabor -->
+    <div class="form-group">
+      <label class="form-label" for="inputNome">
+        <i class="fa-solid fa-ice-cream"></i> Nome / Sabor
+      </label>
+      <input
+        type="text"
+        id="inputNome"
+        name="nome"
+        class="form-input"
+        placeholder="Ex: Trufa de Maracujá Cravejado"
+        value="{{ produto.nome if produto else '' }}"
+        required
+        autocomplete="off"
+        autofocus
+      />
+      <p class="form-hint">💡 Sabores com a palavra "cravejado" terão preço automático de R$ 4,80.</p>
+      <!-- Preview do preço calculado automaticamente -->
+      <span class="form-price-preview" id="previewPreco">
+        {% if produto %}
+          {% if 'cravejado' in produto.nome.lower() or 'cravejada' in produto.nome.lower() %}
+            🌟 Cravejado — Preço: R$ 4,80
+          {% else %}
+            Sabor padrão — Preço: R$ 4,00
+          {% endif %}
+        {% else %}
+          Sabor padrão — Preço: R$ 4,00
+        {% endif %}
+      </span>
+    </div>
+
+    <!-- Quantidade -->
+    <div class="form-group">
+      <label class="form-label" for="inputQuantidade">
+        <i class="fa-solid fa-boxes-stacked"></i> Quantidade em Estoque
+      </label>
+      <input
+        type="number"
+        id="inputQuantidade"
+        name="quantidade"
+        class="form-input"
+        placeholder="Ex: 10"
+        value="{{ produto.quantidade if produto else '' }}"
+        min="0"
+        required
+      />
+      <p class="form-hint">Quantidade atual de trufas deste sabor disponíveis para venda.</p>
+    </div>
+
+    <!-- Botões de ação -->
+    <div class="form-actions">
+      <a href="/" class="btn btn--outline">
+        <i class="fa-solid fa-arrow-left"></i> Voltar
+      </a>
+      <button type="submit" class="btn btn--chocolate">
+        <i class="fa-solid fa-floppy-disk"></i>
+        {% if produto %}Salvar Alterações{% else %}Cadastrar{% endif %}
+      </button>
+    </div>
+
+  </form>
+</div>
+
+{% endblock %}

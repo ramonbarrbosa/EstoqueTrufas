@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#5C3D2E" />
+  <title>🍬 Trufas — Estoque</title>
+
+  <!-- PWA Manifest & Icons -->
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="static/icons/icon-192.png" />
+
+  <!-- Google Fonts: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Ícones Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="static/css/style.css" />
+</head>
+<body>
+
+  <!-- ─── Cabeçalho ──────────────────────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="header-icon">🍬</span>
+        <div>
+          <h1 class="header-title">Trufas</h1>
+          <p class="header-subtitle">Controle de Estoque</p>
+        </div>
+      </div>
+      <button class="header-action-btn" onclick="abrirModal('modalBackup')" title="Backup e Dados">
+        <i class="fa-solid fa-cloud-arrow-down"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ─── Banner de Instalação PWA (aparece no celular se suportado) ──────────── -->
+  <div class="install-banner" id="installBanner" style="display: none;">
+    <div class="install-banner-text">
+      <i class="fa-solid fa-mobile-screen-button"></i>
+      <span>Instalar aplicativo na tela inicial</span>
+    </div>
+    <button class="btn btn--install" id="btnInstalarApp">Instalar</button>
+  </div>
+
+  <!-- ─── Conteúdo Principal ─────────────────────────────────────────────────── -->
+  <main class="app-main">
+
+    <!-- Container de notificações Toast -->
+    <div class="flash-container" id="toastContainer"></div>
+
+    <!-- ─── Resumo do Estoque ────────────────────────────────────────────────── -->
+    <section class="stock-summary">
+      <div class="summary-card">
+        <span class="summary-number" id="sumSabores">0</span>
+        <span class="summary-label">Sabores</span>
+      </div>
+      <div class="summary-card summary-card--available">
+        <span class="summary-number" id="sumDisponiveis">0</span>
+        <span class="summary-label">Disponíveis</span>
+      </div>
+      <div class="summary-card summary-card--total">
+        <span class="summary-number" id="sumUnidades">0</span>
+        <span class="summary-label">Unidades</span>
+      </div>
+    </section>
+
+    <!-- ─── Lista de Produtos ───────────────────────────────────────────────── -->
+    <section class="product-list" id="productList"></section>
+
+    <!-- Estado vazio (quando não há sabores) -->
+    <div class="empty-state" id="emptyState" style="display: none;">
+      <div class="empty-icon">🍬</div>
+      <h2 class="empty-title">Nenhum sabor cadastrado</h2>
+      <p class="empty-text">Toque em <strong>"Novo Sabor"</strong> abaixo para começar a montar o seu cardápio!</p>
+    </div>
+  </main>
+
+  <!-- ─── Barra de Ações Fixa no Rodapé ──────────────────────────────────────── -->
+  <nav class="bottom-bar">
+    <button class="bottom-btn bottom-btn--primary" onclick="abrirModalProduto()">
+      <i class="fa-solid fa-plus"></i>
+      <span>Novo Sabor</span>
+    </button>
+    <button class="bottom-btn bottom-btn--gold" onclick="abrirRelatorio()">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Vendas</span>
+    </button>
+    <button class="bottom-btn bottom-btn--whatsapp" onclick="compartilharWhatsApp()">
+      <i class="fa-brands fa-whatsapp"></i>
+      <span>WhatsApp</span>
+    </button>
+  </nav>
+
+  <!-- ─── Modal: Cadastro / Edição de Sabor ─────────────────────────────────── -->
+  <div class="modal-overlay" id="modalProduto" onclick="fecharModal('modalProduto')">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalProdutoTitulo">
+          <i class="fa-solid fa-plus"></i> Novo Sabor
+        </h2>
+        <button class="modal-close" onclick="fecharModal('modalProduto')">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="formProduto" onsubmit="salvarProduto(event)">
+          <input type="hidden" id="prodId" />
+          
+          <div class="form-group">
+            <label class="form-label" for="prodNome">
+              <i class="fa-solid fa-ice-cream"></i> Nome / Sabor
+            </label>
+            <input
+              type="text"
+              id="prodNome"
+              class="form-input"
+              placeholder="Ex: Maracujá Cravejado"
+              required
+              autocomplete="off"
+            />
+            <p class="form-hint">💡 Sabores com a palavra "cravejado" terão preço automático de R$ 4,80.</p>
+            <span class="form-price-preview" id="prodPrecoPreview">Sabor padrão — Preço: R$ 4,00</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prodQtd">
+              <i class="fa-solid fa-boxes-stacked"></i> Quantidade em Estoque
+            </label>
+            <input
+              type="number"
+              id="prodQtd"
+              class="form-input"
+              placeholder="Ex: 10"
+              min="0"
+              required
+            />
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn--outline" onclick="fecharModal('modalProduto')">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn--chocolate">
+              <i class="fa-solid fa-floppy-disk"></i> Salvar Sabor
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Modal: Relatório de Vendas ─────────────────────────────────────────── -->
+  <div class="modal-overlay" id="modalRelatorio" onclick="fecharModal('modalRelatorio')">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title"><i class="fa-solid fa-chart-line"></i> Relatório de Vendas</h2>
+        <button class="modal-close" onclick="fecharModal('modalRelatorio')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="relatorioConteudo"></div>
+    </div>
+  </div>
+
+  <!-- ─── Modal: Compartilhar no WhatsApp ────────────────────────────────────── -->
+  <div class="modal-overlay" id="modalWhatsApp" onclick="fecharModal('modalWhatsApp')">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title"><i class="fa-brands fa-whatsapp"></i> Compartilhar Cardápio</h2>
+        <button class="modal-close" onclick="fecharModal('modalWhatsApp')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-hint">Prévia da mensagem pronta para enviar:</p>
+        <div class="whatsapp-preview" id="whatsappTexto">Carregando...</div>
+        <div class="modal-actions">
+          <button class="btn btn--gold btn--full" onclick="copiarTexto()">
+            <i class="fa-solid fa-copy"></i> Copiar Mensagem
+          </button>
+          <a id="btnAbrirWpp" href="#" target="_blank" class="btn btn--whatsapp btn--full">
+            <i class="fa-brands fa-whatsapp"></i> Abrir no WhatsApp
+          </a>
+        </div>
+        <div class="copy-feedback" id="copyFeedback">
+          <i class="fa-solid fa-circle-check"></i> Copiado para a área de transferência!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Modal: Backup & Restaurar Dados ────────────────────────────────────── -->
+  <div class="modal-overlay" id="modalBackup" onclick="fecharModal('modalBackup')">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 class="modal-title"><i class="fa-solid fa-cloud-arrow-down"></i> Segurança dos Dados</h2>
+        <button class="modal-close" onclick="fecharModal('modalBackup')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-hint">Os dados ficam salvos de forma segura no seu celular. Você pode salvar uma cópia de segurança a qualquer momento:</p>
+        <div class="modal-actions">
+          <button class="btn btn--chocolate btn--full" onclick="exportarBackup()">
+            <i class="fa-solid fa-file-export"></i> Fazer Backup (Baixar Cópia)
+          </button>
+          <label class="btn btn--outline btn--full" style="cursor: pointer; margin-top: 6px;">
+            <i class="fa-solid fa-file-import"></i> Restaurar Cópia Salva
+            <input type="file" id="arquivoBackup" accept=".json" style="display: none;" onchange="importarBackup(event)" />
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="static/js/app.js"></script>
+</body>
+</html>
+

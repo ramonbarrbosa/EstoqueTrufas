@@ -1,0 +1,26 @@
+{
+  "name": "Trufas — Controle de Estoque",
+  "short_name": "Trufas",
+  "description": "Controle ágil de estoque e vendas de trufas artesanais para WhatsApp",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FDF8F0",
+  "theme_color": "#5C3D2E",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
